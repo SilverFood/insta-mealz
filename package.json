@@ -3,21 +3,33 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "npm run dev:sbx",
+    "dev:sbx": "dotenv -e .env.sbx.local -- cross-env INSTAMEALZ_ENV=sbx next dev",
+    "dev:prod": "dotenv -e .env.prod.local -- cross-env INSTAMEALZ_ENV=prod next dev",
+    "build": "npm run build:prod",
+    "build:sbx": "dotenv -e .env.sbx.local -- cross-env INSTAMEALZ_ENV=sbx next build",
+    "build:prod": "dotenv -e .env.prod.local -- cross-env INSTAMEALZ_ENV=prod next build",
+    "start": "npm run start:prod",
+    "start:sbx": "dotenv -e .env.sbx.local -- cross-env INSTAMEALZ_ENV=sbx next start",
+    "start:prod": "dotenv -e .env.prod.local -- cross-env INSTAMEALZ_ENV=prod next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "framer-motion": "^13.4.4",
     "next": "16.3.6",
+    "razorpay": "^2.9.8",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "resend": "^6.30.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",

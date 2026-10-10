@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# InstaMealz
 
-## Getting Started
+Next.js storefront with Razorpay checkout, Turso orders, Resend confirmation emails, and an admin orders dashboard.
 
-First, run the development server:
+## Environments (`sbx` vs `prod`)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Each environment has its **own env file** (not committed):
+
+| File | Use |
+|------|-----|
+| `.env.sbx.local` | Sandbox — Razorpay **test** keys, staging Turso DB |
+| `.env.prod.local` | Production — Razorpay **live** keys, production Turso DB |
+
+Templates: [`.env.sbx.example`](.env.sbx.example), [`.env.prod.example`](.env.prod.example).
+
+### One-time setup (Windows PowerShell)
+
+```powershell
+copy .env.sbx.example .env.sbx.local
+copy .env.prod.example .env.prod.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then edit each `.env.*.local` file with the correct Turso URL/token, Razorpay keys, and `ADMIN_ACCESS_KEY` (for `/admin`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Admin orders dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set `ADMIN_ACCESS_KEY` in your env file, then open [http://localhost:3000/admin](http://localhost:3000/admin) and sign in with that key. The URL is not linked from the public site.
 
-## Learn More
+### Local dev commands
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Sandbox (default) — test payments
+npm run dev:sbx
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Same as dev:sbx
+npm run dev
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Production credentials locally — real charges; use with care
+npm run dev:prod
+```
 
-## Deploy on Vercel
+### Build / start
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build:sbx    # build using .env.sbx.local
+npm run build:prod   # build using .env.prod.local (alias: npm run build)
+npm run start:sbx    # after build:sbx
+npm run start:prod   # after build:prod
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+On Vercel (or similar), set env vars on each deployment — you do not upload `.env.*.local`; use the dashboard with the same variable names as in the example files.
+
+## Checkout (Razorpay + Turso)
+
+1. Apply [`sql/schema.sql`](sql/schema.sql) on **both** Turso databases (sandbox and production).
+2. Fill `.env.sbx.local` and `.env.prod.local`.
+3. Run `npm run dev:sbx` and complete a Razorpay **test** payment on `/checkout`.
+
+Payment completion is **client-driven**: after Razorpay succeeds, the browser calls `POST /api/checkout/verify` to verify the signature, mark the order completed, and send the confirmation email. There is no Razorpay server webhook in this repo.
+
+## Production deploy
+
+1. Create or reset the production Turso database and apply [`sql/schema.sql`](sql/schema.sql).
+2. Configure the host (e.g. Vercel) with variables from [`.env.prod.example`](.env.prod.example):
+   - `INSTAMEALZ_ENV=prod`
+   - `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`
+   - `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` (live mode)
+   - `INSTAMEALZ_SITE_URL` (public origin, no trailing slash)
+   - `RESEND_API_KEY`, `EMAIL_FROM` (optional but recommended)
+   - `ADMIN_ACCESS_KEY`
+3. Run `npm run build:prod` locally or let CI run `npm run build` (defaults to prod).
+4. Smoke-test checkout in Razorpay test mode on staging before switching live keys on production.
+
+## Email templates
+
+See [`emails/README.md`](emails/README.md) for previewing `order-confirmation.html`.
