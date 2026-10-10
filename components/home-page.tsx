@@ -211,7 +211,7 @@ export function HomePage() {
           </motion.div>
         </motion.div>
         <motion.div
-          className="relative mx-auto mt-8 h-[420px] max-w-[1100px] overflow-hidden md:h-[620px]"
+          className="relative mx-auto mt-8 h-[460px] max-w-[1100px] overflow-hidden md:h-[680px]"
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10% 0px" }}
@@ -250,16 +250,16 @@ export function HomePage() {
                   style={{ willChange: "transform, opacity" }}
                   className={
                     isCurrent
-                      ? "absolute bottom-0 left-1/2 top-0 z-10 my-auto h-[380px] w-[304px] -ml-[152px] translate-y-12 cursor-pointer border-0 bg-transparent p-0 md:h-[540px] md:w-[432px] md:-ml-[216px] md:translate-y-16 lg:h-[600px] lg:w-[480px] lg:-ml-[240px] lg:translate-y-20"
+                      ? "absolute bottom-0 left-1/2 top-0 z-10 my-auto h-[380px] w-[304px] -ml-[152px] translate-y-6 cursor-pointer border-0 bg-transparent p-0 md:h-[540px] md:w-[432px] md:-ml-[216px] md:translate-y-10 lg:h-[600px] lg:w-[480px] lg:-ml-[240px] lg:translate-y-12"
                       : slot === "prev"
-                      ? "pointer-events-none absolute bottom-0 top-0 my-auto h-[248px] w-[198px] -translate-y-12 object-contain max-md:-left-40 md:left-3 md:h-[286px] md:w-[228px] md:-translate-y-16 lg:left-8 lg:h-[324px] lg:w-[258px] lg:-translate-y-20"
-                      : "pointer-events-none absolute bottom-0 top-0 my-auto h-[248px] w-[198px] -translate-y-12 object-contain max-md:-right-40 md:right-3 md:h-[286px] md:w-[228px] md:-translate-y-16 lg:right-8 lg:h-[324px] lg:w-[258px] lg:-translate-y-20"
+                      ? "pointer-events-none absolute bottom-0 top-0 my-auto h-[248px] w-[198px] -translate-y-12 object-contain max-md:-left-[13.5rem] md:-left-3 md:h-[286px] md:w-[228px] md:-translate-y-16 lg:-left-1 lg:h-[324px] lg:w-[258px] lg:-translate-y-20"
+                      : "pointer-events-none absolute bottom-0 top-0 my-auto h-[248px] w-[198px] -translate-y-12 object-contain max-md:-right-[13.5rem] md:-right-3 md:h-[286px] md:w-[228px] md:-translate-y-16 lg:-right-1 lg:h-[324px] lg:w-[258px] lg:-translate-y-20"
                   }
                 >
                   <img
                     src={product.image}
                     alt={isCurrent ? product.name : ""}
-                    className={`h-full w-full object-contain ${isCurrent ? "scale-[1.14]" : "scale-[1.08]"}`}
+                    className={`h-full w-full object-contain ${isCurrent ? "scale-[1.02]" : "scale-[0.96]"}`}
                   />
                 </motion.button>
               );
@@ -269,7 +269,7 @@ export function HomePage() {
             type="button"
             aria-label="Previous meal"
             onClick={() => goSlide(-1)}
-            className="absolute left-3 top-1/2 z-20 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#1d2f16] bg-white/80 p-3 md:left-8"
+            className="absolute left-2 top-1/2 z-20 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#1d2f16] bg-white/80 p-3 md:left-3 lg:left-4"
             whileHover={{ scale: 1.06 }}
             whileTap={tapScale}
           >
@@ -279,7 +279,7 @@ export function HomePage() {
             type="button"
             aria-label="Next meal"
             onClick={() => goSlide(1)}
-            className="absolute right-3 top-1/2 z-20 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#1d2f16] bg-white/80 p-3 md:right-8"
+            className="absolute right-2 top-1/2 z-20 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#1d2f16] bg-white/80 p-3 md:right-3 lg:right-4"
             whileHover={{ scale: 1.06 }}
             whileTap={tapScale}
           >

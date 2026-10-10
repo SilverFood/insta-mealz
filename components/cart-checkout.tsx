@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/components/cart-provider";
 import { lineItemVariants, tapScale } from "@/components/motion/presets";
 import { RevealOnScroll } from "@/components/motion/reveal-on-scroll";
+import { useLiveProducts } from "@/components/use-live-products";
 import { getDeliveryEstimate } from "@/lib/checkout/delivery-estimate";
 import {
   computeCheckoutTotals,
@@ -55,9 +56,11 @@ function loadRazorpayScript() {
 
 export function CartPage() {
   const cart = useCart();
+  const { acceptingOrders } = useLiveProducts();
   const remaining = Math.max(0, FREE_SHIPPING_SUBTOTAL_INR - cart.subtotal);
   const progress = Math.min(100, (cart.subtotal / FREE_SHIPPING_SUBTOTAL_INR) * 100);
   const b2g1Hint = cart.count >= 2 && cart.count % 3 !== 0;
+  const canCheckout = cart.lines.length > 0 && acceptingOrders;
   return (
     <div className="min-w-0 overflow-x-clip bg-white px-5 py-12 md:px-16">
       <RevealOnScroll className="mx-auto max-w-[1100px] min-w-0">
@@ -153,14 +156,25 @@ export function CartPage() {
                 </div>
                 <p className="shrink-0 text-[20px] font-semibold sm:text-[22px]">{formatInr(cart.subtotal)}</p>
               </div>
-              <motion.div whileTap={tapScale}>
-                <Link
-                  href="/checkout"
-                  className="mt-6 flex h-14 w-full items-center justify-center rounded-full bg-[#1d2f16] text-[18px] font-semibold text-white transition-colors duration-300 hover:bg-[#314e24] md:mt-8 md:text-[20px]"
+              {canCheckout ? (
+                <motion.div whileTap={tapScale}>
+                  <Link
+                    href="/checkout"
+                    className="mt-6 flex h-14 w-full items-center justify-center rounded-full bg-[#1d2f16] text-[18px] font-semibold text-white transition-colors duration-300 hover:bg-[#314e24] md:mt-8 md:text-[20px]"
+                  >
+                    Checkout
+                  </Link>
+                </motion.div>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled
+                  className="mt-6 flex h-14 w-full cursor-not-allowed items-center justify-center rounded-full bg-[#1d2f16] text-[18px] font-semibold text-white opacity-60 md:mt-8 md:text-[20px]"
                 >
-                  Checkout
-                </Link>
-              </motion.div>
+                  Coming soon
+                </button>
+              )}
             </div>
           </>
         )}

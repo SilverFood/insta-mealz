@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/components/cart-provider";
 import { QuantityStepper } from "@/components/quantity-stepper";
+import { useLiveProducts } from "@/components/use-live-products";
 import { AnimatedOverlay } from "@/components/motion/animated-overlay";
 import { hoverLift, lineItemVariants, tapScale } from "@/components/motion/presets";
 import { MAX_ORDER_NOTE_LENGTH } from "@/lib/checkout/types";
@@ -15,6 +16,8 @@ import { categories, type Category, type Product } from "@/lib/products";
 export function CartDrawer() {
   const cart = useCart();
   const hasItems = cart.lines.length > 0;
+  const { acceptingOrders } = useLiveProducts();
+  const canCheckout = hasItems && acceptingOrders;
   return (
     <AnimatedOverlay
       open={cart.drawerOpen}
@@ -121,7 +124,7 @@ export function CartDrawer() {
               View Cart
             </Link>
           </motion.div>
-          {hasItems ? (
+          {canCheckout ? (
             <motion.div className="w-full min-w-0" whileHover={hoverLift} whileTap={tapScale}>
               <Link
                 href="/checkout"
@@ -138,7 +141,7 @@ export function CartDrawer() {
               aria-disabled
               className="flex h-[60px] w-full cursor-not-allowed items-center justify-center rounded-full bg-[#1d2f16] font-sans text-[20px] font-semibold text-white opacity-50"
             >
-              Checkout
+              {hasItems ? "Coming soon" : "Checkout"}
             </button>
           )}
         </div>
@@ -351,7 +354,7 @@ export function ProductCard({
             alt={product.name}
             width={280}
             height={280}
-            className="h-full w-full object-contain"
+            className="h-[86%] w-[86%] object-contain"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.35 }}
