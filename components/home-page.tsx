@@ -479,7 +479,7 @@ export function HomePage() {
           <h2 className="text-center font-sans text-[28px] font-semibold text-[#1d2f16] md:text-[32px]">What makes us different</h2>
         </RevealOnScroll>
         <motion.div
-          className="mx-auto mt-10 grid max-w-[1360px] grid-cols-1 gap-6 md:grid-cols-2"
+          className="mx-auto mt-10 grid max-w-[1360px] grid-cols-2 gap-4 md:gap-6"
           variants={staggerContainerVariants}
           initial="hidden"
           whileInView="show"
