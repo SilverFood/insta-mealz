@@ -12,6 +12,7 @@ type AdminDashboardProps = {
   orders: AdminOrderSummary[];
   products: Product[];
   appEnv: AppEnv;
+  acceptingOrders: boolean;
 };
 type DashboardTab = "orders" | "inventory";
 
@@ -259,12 +260,15 @@ function OrderExpandedContent({
   );
 }
 
-export function AdminDashboard({ orders, products, appEnv }: AdminDashboardProps) {
+export function AdminDashboard({ orders, products, appEnv, acceptingOrders }: AdminDashboardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<DashboardTab>("orders");
   const [inventory, setInventory] = useState(products);
+  const [isAcceptingOrders, setIsAcceptingOrders] = useState(acceptingOrders);
+  const [savingAcceptingOrders, setSavingAcceptingOrders] = useState(false);
   const [savingStockBySlug, setSavingStockBySlug] = useState<Record<string, boolean>>({});
   const [stockError, setStockError] = useState<string | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [detailsById, setDetailsById] = useState<Record<string, OrderConfirmationDetails>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -394,6 +398,36 @@ export function AdminDashboard({ orders, products, appEnv }: AdminDashboardProps
     }
   }
 
+  async function setAcceptingOrdersValue(nextValue: boolean) {
+    if (savingAcceptingOrders || nextValue === isAcceptingOrders) return;
+
+    const previousValue = isAcceptingOrders;
+    setSettingsError(null);
+    setSavingAcceptingOrders(true);
+    setIsAcceptingOrders(nextValue);
+
+    try {
+      const res = await fetch("/api/admin/store-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ acceptingOrders: nextValue }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        settings?: { acceptingOrders: boolean };
+        error?: string;
+      };
+      if (!res.ok || !data.settings) {
+        throw new Error(data.error || "Could not update store settings");
+      }
+      setIsAcceptingOrders(Boolean(data.settings.acceptingOrders));
+    } catch (error) {
+      setIsAcceptingOrders(previousValue);
+      setSettingsError(error instanceof Error ? error.message : "Could not update store settings");
+    } finally {
+      setSavingAcceptingOrders(false);
+    }
+  }
+
   const revenueLabel = formatPaise(stats.revenueCollectedPaise);
 
   return (
@@ -433,6 +467,35 @@ export function AdminDashboard({ orders, products, appEnv }: AdminDashboardProps
               label="Inventory"
               onClick={() => setActiveTab("inventory")}
             />
+          </div>
+
+          <div className="mt-6 rounded-[20px] border border-[#ede4d4] bg-white px-5 py-4 sm:px-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-[#83957c] sm:text-[13px]">Store status</p>
+                <p className="mt-1 text-[15px] text-[#1d2f16] sm:text-[16px]">
+                  {isAcceptingOrders ? "Taking orders" : "Orders paused"}
+                </p>
+                <p className="mt-1 text-[13px] text-[#83957c] sm:text-[14px]">
+                  When paused, checkout is blocked and out-of-stock products are hidden from the store listing.
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <StockToggle
+                  checked={isAcceptingOrders}
+                  disabled={savingAcceptingOrders}
+                  onToggle={() => setAcceptingOrdersValue(!isAcceptingOrders)}
+                />
+                <span className="min-w-[84px] text-right text-[13px] text-[#83957c]">
+                  {savingAcceptingOrders ? "Saving…" : isAcceptingOrders ? "On" : "Off"}
+                </span>
+              </div>
+            </div>
+            {settingsError ? (
+              <p className="mt-3 rounded-xl border border-[#f0d4d1] bg-[#fdf5f4] px-4 py-3 text-[14px] text-[#c4554a]">
+                {settingsError}
+              </p>
+            ) : null}
           </div>
 
           {activeTab === "orders" ? (

@@ -4,6 +4,7 @@ import { resolveOrderLines, subtotalPaiseFromLines } from "@/lib/checkout/resolv
 import { normalizeOrderNote, parseMarketingOptIn, type CreateCheckoutBody } from "@/lib/checkout/types";
 import { validateCheckoutBody } from "@/lib/checkout/validate";
 import { createPendingOrder, setRazorpayOrderId } from "@/lib/db/orders";
+import { getStoreSettings } from "@/lib/db/store-settings";
 import { generateOrderId } from "@/lib/orders/generate-order-id";
 import { getAppEnv } from "@/lib/env";
 import { getRazorpay, getRazorpayKeyId } from "@/lib/razorpay/server";
@@ -40,6 +41,11 @@ function parseBody(body: CreateCheckoutBody) {
 
 export async function POST(request: Request) {
   try {
+    const storeSettings = await getStoreSettings();
+    if (!storeSettings.acceptingOrders) {
+      return NextResponse.json({ error: "We will start taking orders soon." }, { status: 409 });
+    }
+
     const body = (await request.json()) as CreateCheckoutBody;
     const parsed = parseBody(body);
     const lines = await resolveOrderLines(parsed.items);

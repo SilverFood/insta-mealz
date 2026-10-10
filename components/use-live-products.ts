@@ -5,6 +5,7 @@ import { products as baseProducts, type Product } from "@/lib/products";
 
 type LiveProductsResponse = {
   products?: Product[];
+  acceptingOrders?: boolean;
 };
 
 function mergeLiveProducts(next: Product[]): Product[] {
@@ -18,6 +19,7 @@ function mergeLiveProducts(next: Product[]): Product[] {
 
 export function useLiveProducts() {
   const [products, setProducts] = useState<Product[]>(baseProducts);
+  const [acceptingOrders, setAcceptingOrders] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,8 +28,13 @@ export function useLiveProducts() {
       try {
         const res = await fetch("/api/products/stock", { cache: "no-store" });
         const data = (await res.json().catch(() => ({}))) as LiveProductsResponse;
-        if (!res.ok || !Array.isArray(data.products) || cancelled) return;
-        setProducts(mergeLiveProducts(data.products));
+        if (!res.ok || cancelled) return;
+        if (typeof data.acceptingOrders === "boolean") {
+          setAcceptingOrders(data.acceptingOrders);
+        }
+        if (Array.isArray(data.products)) {
+          setProducts(mergeLiveProducts(data.products));
+        }
       } catch {
         // Keep static catalog fallback if live stock fetch fails.
       }
@@ -48,5 +55,5 @@ export function useLiveProducts() {
     return map;
   }, [products]);
 
-  return { products, bySlug };
+  return { products, bySlug, acceptingOrders };
 }

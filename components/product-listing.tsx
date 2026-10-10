@@ -22,7 +22,7 @@ function sortProducts(list: Product[], sort: string) {
 }
 
 export function ProductListing() {
-  const { products } = useLiveProducts();
+  const { products, acceptingOrders } = useLiveProducts();
   const params = useSearchParams();
   const query = params.get("q")?.trim().toLowerCase() ?? "";
   const [category, setCategory] = useState<"All" | Category>("All");
@@ -38,6 +38,7 @@ export function ProductListing() {
     const to = Number(priceTo);
     return sortProducts(
       products.filter((product) => {
+        if (!acceptingOrders && !product.inStock) return false;
         if (category !== "All" && product.category !== category) return false;
         if (query && !product.name.toLowerCase().includes(query)) return false;
         if (inStockOnly !== null && product.inStock !== inStockOnly) return false;
@@ -47,7 +48,7 @@ export function ProductListing() {
       }),
       sort,
     );
-  }, [products, category, query, inStockOnly, priceFrom, priceTo, sort]);
+  }, [products, acceptingOrders, category, query, inStockOnly, priceFrom, priceTo, sort]);
   const inStockCount = useMemo(
     () => products.filter((product) => product.inStock).length,
     [products],

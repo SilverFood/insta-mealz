@@ -4,6 +4,7 @@ import { AdminLoginForm } from "@/components/admin-login-form";
 import { hasAdminSessionFromCookies, isAdminAccessConfigured } from "@/lib/admin/auth";
 import { listAdminOrders } from "@/lib/db/orders";
 import { listProductsWithLiveStock } from "@/lib/db/product-stock";
+import { getStoreSettings } from "@/lib/db/store-settings";
 import { getAppEnv } from "@/lib/env";
 
 export const metadata: Metadata = {
@@ -25,7 +26,15 @@ export default async function AdminPage() {
 
   const orders = await listAdminOrders();
   const products = await listProductsWithLiveStock();
+  const storeSettings = await getStoreSettings();
   const appEnv = getAppEnv();
 
-  return <AdminDashboard orders={orders} products={products} appEnv={appEnv} />;
+  return (
+    <AdminDashboard
+      orders={orders}
+      products={products}
+      appEnv={appEnv}
+      acceptingOrders={storeSettings.acceptingOrders}
+    />
+  );
 }
