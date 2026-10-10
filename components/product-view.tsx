@@ -30,7 +30,7 @@ const heroItem = {
 };
 
 const galleryImages = (product: Product) =>
-  [product.image, product.slide ?? product.image, "/images/powders.png"] as const;
+  product.slide && product.slide !== product.image ? [product.image, product.slide] : [product.image];
 
 export function ProductView({ product }: { product: Product }) {
   const cart = useCart();

@@ -126,9 +126,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         emit({ ...getSnapshot(), lines });
       },
       hasProduct: (slug, variant) =>
-        getSnapshot().lines.some((line) => line.slug === slug && (variant === undefined || line.variant === variant)),
+        cartState.lines.some((line) => line.slug === slug && (variant === undefined || line.variant === variant)),
       findLine: (slug, variant, price) =>
-        getSnapshot().lines.find(
+        cartState.lines.find(
           (item) => item.slug === slug && item.variant === variant && item.price === price,
         ),
       setQty: (id, qty) => {

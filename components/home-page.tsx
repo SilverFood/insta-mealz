@@ -227,6 +227,7 @@ export function HomePage() {
             ).map(({ product, slot }) => {
               const isCurrent = slot === "current";
               const sideOffset = slot === "prev" ? -120 : slot === "next" ? 120 : incomingDirection > 0 ? 140 : -140;
+              const stackTilt = 0;
               return (
                 <motion.button
                   key={product.slug}
@@ -236,25 +237,30 @@ export function HomePage() {
                   aria-hidden={isCurrent ? undefined : true}
                   tabIndex={isCurrent ? 0 : -1}
                   onClick={isCurrent ? () => router.push(`/products/${product.slug}`) : undefined}
-                  initial={reducedMotion ? false : { opacity: 0, x: sideOffset, scale: isCurrent ? 0.98 : 0.9 }}
-                  animate={{ opacity: isCurrent ? 1 : 0.7, x: 0, scale: isCurrent ? 1 : 0.92 }}
-                  exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: sideOffset, scale: isCurrent ? 0.98 : 0.9 }}
+                  initial={reducedMotion ? false : { opacity: 0, x: sideOffset, scale: isCurrent ? 0.98 : 0.9, rotate: stackTilt }}
+                  animate={{ opacity: isCurrent ? 1 : 0.7, x: 0, scale: isCurrent ? 1 : 0.92, rotate: stackTilt }}
+                  exit={reducedMotion ? { opacity: 0, rotate: stackTilt } : { opacity: 0, x: sideOffset, scale: isCurrent ? 0.98 : 0.9, rotate: stackTilt }}
                   transition={{
                     layout: { duration: carouselMotionDuration, ease: easeOut },
                     opacity: { duration: carouselMotionDuration * 0.85, ease: easeOut },
                     x: { duration: carouselMotionDuration, ease: easeOut },
                     scale: { duration: carouselMotionDuration, ease: easeOut },
+                    rotate: { duration: carouselMotionDuration, ease: easeOut },
                   }}
                   style={{ willChange: "transform, opacity" }}
                   className={
                     isCurrent
-                      ? "absolute bottom-0 left-1/2 top-0 z-10 my-auto h-[300px] w-[240px] -ml-[120px] translate-y-12 cursor-pointer border-0 bg-transparent p-0 md:h-[440px] md:w-[352px] md:-ml-[176px] md:translate-y-16 lg:h-[500px] lg:w-[400px] lg:-ml-[200px] lg:translate-y-20"
+                      ? "absolute bottom-0 left-1/2 top-0 z-10 my-auto h-[380px] w-[304px] -ml-[152px] translate-y-12 cursor-pointer border-0 bg-transparent p-0 md:h-[540px] md:w-[432px] md:-ml-[216px] md:translate-y-16 lg:h-[600px] lg:w-[480px] lg:-ml-[240px] lg:translate-y-20"
                       : slot === "prev"
-                      ? "pointer-events-none absolute bottom-0 top-0 my-auto h-[200px] w-[160px] -translate-y-12 object-contain max-md:-left-40 md:left-3 md:h-[230px] md:w-[184px] md:-translate-y-16 lg:left-8 lg:h-[260px] lg:w-[208px] lg:-translate-y-20"
-                      : "pointer-events-none absolute bottom-0 top-0 my-auto h-[200px] w-[160px] -translate-y-12 object-contain max-md:-right-40 md:right-3 md:h-[230px] md:w-[184px] md:-translate-y-16 lg:right-8 lg:h-[260px] lg:w-[208px] lg:-translate-y-20"
+                      ? "pointer-events-none absolute bottom-0 top-0 my-auto h-[248px] w-[198px] -translate-y-12 object-contain max-md:-left-40 md:left-3 md:h-[286px] md:w-[228px] md:-translate-y-16 lg:left-8 lg:h-[324px] lg:w-[258px] lg:-translate-y-20"
+                      : "pointer-events-none absolute bottom-0 top-0 my-auto h-[248px] w-[198px] -translate-y-12 object-contain max-md:-right-40 md:right-3 md:h-[286px] md:w-[228px] md:-translate-y-16 lg:right-8 lg:h-[324px] lg:w-[258px] lg:-translate-y-20"
                   }
                 >
-                  <img src={product.slide} alt={isCurrent ? product.name : ""} className="h-full w-full object-contain" />
+                  <img
+                    src={product.image}
+                    alt={isCurrent ? product.name : ""}
+                    className={`h-full w-full object-contain ${isCurrent ? "scale-[1.14]" : "scale-[1.08]"}`}
+                  />
                 </motion.button>
               );
             })}
@@ -285,23 +291,23 @@ export function HomePage() {
             <motion.div
               key={current.slug}
               custom={captionDirection}
-              initial={(delta: number) => ({
+              initial={{
                 opacity: 0,
-                x: delta > 0 ? 24 : -24,
+                x: captionDirection > 0 ? 24 : -24,
                 y: 2,
-              })}
+              }}
               animate={{
                 opacity: 1,
                 x: 0,
                 y: 0,
                 transition: { duration: carouselMotionDuration, ease: easeOut },
               }}
-              exit={(delta: number) => ({
+              exit={{
                 opacity: 0,
-                x: delta > 0 ? -20 : 20,
+                x: captionDirection > 0 ? -20 : 20,
                 y: -2,
                 transition: { duration: carouselMotionDuration * 0.7, ease: easeOut },
-              })}
+              }}
               className="flex w-full flex-col items-center"
             >
               <p className="font-sans text-[20px] font-semibold">{current.name}</p>

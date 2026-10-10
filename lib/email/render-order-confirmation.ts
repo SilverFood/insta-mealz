@@ -8,6 +8,10 @@ import { packageSizeLabel } from "@/lib/products/package-sizes";
 
 const TEMPLATE_PATH = join(process.cwd(), "emails", "order-confirmation.html");
 
+type RenderOrderConfirmationOptions = {
+  resolveAssetSrc?: (assetPath: string) => string | null;
+};
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -42,20 +46,34 @@ function formatDeliveryAddress(order: OrderConfirmationDetails): string {
   return lines.map(escapeHtml).join("<br />");
 }
 
-function productImageSrc(siteUrl: string, imageUrl: string | null): string | null {
-  if (!imageUrl?.trim()) return null;
-  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) return imageUrl;
-  return `${siteUrl}${imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`}`;
+function publicAssetPathFromUrl(imageUrl: string): string {
+  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
-function renderItemRows(items: OrderConfirmationDetails["items"], siteUrl: string): string {
+function productImageSrc(
+  siteUrl: string,
+  imageUrl: string | null,
+  resolveAssetSrc?: (assetPath: string) => string | null,
+): string | null {
+  if (!imageUrl?.trim()) return null;
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) return imageUrl;
+  const assetPath = publicAssetPathFromUrl(imageUrl);
+  const resolved = resolveAssetSrc?.(assetPath);
+  return resolved ?? `${siteUrl}${assetPath}`;
+}
+
+function renderItemRows(
+  items: OrderConfirmationDetails["items"],
+  siteUrl: string,
+  resolveAssetSrc?: (assetPath: string) => string | null,
+): string {
   return items
     .map((item) => {
       const name = escapeHtml(item.name);
       const variant = escapeHtml(packageSizeLabel(item.variant));
       const lineTotal = paiseToInr(item.lineTotalPaise);
       const qty = item.quantity;
-      const imgSrc = productImageSrc(siteUrl, item.imageUrl);
+      const imgSrc = productImageSrc(siteUrl, item.imageUrl, resolveAssetSrc);
       const imageCell = imgSrc
         ? `<img src="${escapeHtml(imgSrc)}" width="64" height="64" alt="" class="bg-pouch" style="width: 64px; height: 64px; background-color: ${t.pouchBg}; border-radius: 6px; object-fit: contain;" />`
         : `<div class="bg-pouch" style="width: 64px; height: 64px; background-color: ${t.pouchBg}; border-radius: 6px;"></div>`;
@@ -120,17 +138,22 @@ function renderDiscountSection(order: OrderConfirmationDetails): string {
                   </tr>`;
 }
 
-export function renderOrderConfirmationEmail(order: OrderConfirmationDetails): string {
+export function renderOrderConfirmationEmail(
+  order: OrderConfirmationDetails,
+  options?: RenderOrderConfirmationOptions,
+): string {
   const siteUrl = getSiteUrl();
+  const logoSrc = options?.resolveAssetSrc?.("/images/logo.png") ?? `${siteUrl}/images/logo.png`;
   let html = loadTemplate();
   const itemCount = order.items.reduce((sum, line) => sum + line.quantity, 0);
 
   const replacements: Record<string, string> = {
     "{{SITE_URL}}": siteUrl,
+    "{{LOGO_SRC}}": escapeHtml(logoSrc),
     "{{FIRST_NAME}}": escapeHtml(order.address.firstName),
     "{{ORDER_ID}}": escapeHtml(order.id),
     "{{ORDER_DATE}}": escapeHtml(formatOrderDate(order.createdAt)),
-    "{{ITEM_ROWS}}": renderItemRows(order.items, siteUrl),
+    "{{ITEM_ROWS}}": renderItemRows(order.items, siteUrl, options?.resolveAssetSrc),
     "{{ITEM_COUNT}}": String(itemCount),
     "{{SUBTOTAL}}": paiseToInr(order.subtotalPaise),
     "{{DISCOUNT_SECTION}}": renderDiscountSection(order),
