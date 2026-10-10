@@ -1,6 +1,6 @@
 export type CheckoutItemInput = {
   slug: string;
-  /** Package size id (e.g. 200ml, 500ml). Sent as `variant` from the cart. */
+  /** Package size id (e.g. 250gm). Sent as `variant` from the cart. */
   variant: string;
   packageSize?: string;
   quantity: number;

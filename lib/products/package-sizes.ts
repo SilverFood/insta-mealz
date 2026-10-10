@@ -6,8 +6,7 @@ export type PackageSize = {
 };
 
 export const PACKAGE_SIZES: PackageSize[] = [
-  { id: "200ml", label: "200ml", note: "200ml, serves 2", priceFactor: 1 },
-  { id: "500ml", label: "500ml", note: "500ml, serves 4", priceFactor: 2 },
+  { id: "250gm", label: "250gm", note: "250gm pack", priceFactor: 1 },
 ];
 
 export const DEFAULT_PACKAGE_SIZE_ID = PACKAGE_SIZES[0].id;

@@ -206,7 +206,7 @@ export function renderOrderConfirmationPlainText(order: OrderConfirmationDetails
     "Delivery address:",
     formatDeliveryAddress(order).replace(/<br \/>/g, "\n"),
     "",
-    "Questions? Call +91 98256 73899",
+    "Questions? Email info@instamealz.in",
     "",
     "— InstaMealz",
   ];

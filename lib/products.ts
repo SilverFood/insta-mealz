@@ -13,11 +13,21 @@ export type Product = {
   blurb: string;
 };
 
-export const products: Product[] = [
+const PRODUCT_IMAGE_ORIGIN = (process.env.NEXT_PUBLIC_PRODUCT_IMAGE_ORIGIN ?? "https://instamealz.in").replace(/\/+$/, "");
+
+export function resolveProductImage(path: string): string {
+  const trimmed = path.trim();
+  if (!trimmed) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return `${PRODUCT_IMAGE_ORIGIN}${normalized}`;
+}
+
+const productCatalog: Product[] = [
   {
     slug: "paneer-butter-masala",
     name: "Paneer Butter Masala",
-    price: 299,
+    price: 220,
     category: "Gravy",
     image: "/images/products/paneer_butter_masala_front.png",
     slide: "/images/products/paneer_butter_masala_back.png",
@@ -30,7 +40,7 @@ export const products: Product[] = [
   {
     slug: "palak-paneer",
     name: "Palak Paneer",
-    price: 450,
+    price: 220,
     category: "Gravy",
     image: "/images/products/palak_paneer_front.png",
     slide: "/images/products/palak_paneer_back.png",
@@ -43,7 +53,7 @@ export const products: Product[] = [
   {
     slug: "pav-bhaji",
     name: "Pav Bhaji",
-    price: 450,
+    price: 200,
     category: "Snacks",
     image: "/images/products/pav_bhaji_front.png",
     slide: "/images/products/pav_bhaji_back.png",
@@ -56,7 +66,7 @@ export const products: Product[] = [
   {
     slug: "jeera-rice",
     name: "Jeera Rice",
-    price: 399,
+    price: 200,
     category: "Rice",
     image: "/images/products/jeera_rice_front.png",
     slide: "/images/products/jeera_rice_back.png",
@@ -68,7 +78,7 @@ export const products: Product[] = [
   {
     slug: "veg-dum-biryani",
     name: "Veg Dum Biryani",
-    price: 499,
+    price: 200,
     category: "Rice",
     image: "/images/products/veg_dum_biryani_front.png",
     slide: "/images/products/veg_dum_biryani_back.png",
@@ -80,7 +90,7 @@ export const products: Product[] = [
   {
     slug: "dal-khichdi",
     name: "Dal Khichdi",
-    price: 420,
+    price: 200,
     category: "Rice",
     image: "/images/products/dal_khichdi_front.png",
     slide: "/images/products/dal_khichdi_back.png",
@@ -92,7 +102,7 @@ export const products: Product[] = [
   {
     slug: "rajma-masala",
     name: "Rajma Masala",
-    price: 399,
+    price: 200,
     category: "Gravy",
     image: "/images/products/rajma_masala_front.png",
     slide: "/images/products/rajma_masala_back.png",
@@ -104,7 +114,7 @@ export const products: Product[] = [
   {
     slug: "chole-masala",
     name: "Chole Masala",
-    price: 399,
+    price: 200,
     category: "Gravy",
     image: "/images/products/chole_masala_front.png",
     slide: "/images/products/chole_masala_back.png",
@@ -116,7 +126,7 @@ export const products: Product[] = [
   {
     slug: "dal-tadka",
     name: "Dal Tadka",
-    price: 379,
+    price: 200,
     category: "Gravy",
     image: "/images/products/dal_tadka_front.png",
     slide: "/images/products/dal_tadka_back.png",
@@ -128,7 +138,7 @@ export const products: Product[] = [
   {
     slug: "shahi-paneer",
     name: "Shahi Paneer",
-    price: 349,
+    price: 220,
     category: "Gravy",
     image: "/images/products/shahi_paneer_front.png",
     slide: "/images/products/shahi_paneer_back.png",
@@ -140,7 +150,7 @@ export const products: Product[] = [
   {
     slug: "veg-kolhapuri",
     name: "Veg Kolhapuri",
-    price: 399,
+    price: 200,
     category: "Gravy",
     image: "/images/products/veg_kolhapuri_front.png",
     slide: "/images/products/veg_kolhapuri_back.png",
@@ -150,6 +160,12 @@ export const products: Product[] = [
     blurb: "A bold and spicy mixed-vegetable Kolhapuri gravy, cooked fresh and freeze-dried for five-minute prep anywhere.",
   },
 ];
+
+export const products: Product[] = productCatalog.map((product) => ({
+  ...product,
+  image: resolveProductImage(product.image),
+  slide: product.slide ? resolveProductImage(product.slide) : undefined,
+}));
 
 export const categories = ["All", "Rice", "Gravy", "Snacks"] as const;
 
@@ -200,7 +216,7 @@ export const comparisonRows = [
     freeze: "No second cook. The food is never boiled twice.",
     retort: "Prolonged high heat after cooking.",
   },
-  { label: "Weight/ meal", freeze: "50-80g", retort: "250-300g" },
+  { label: "Net weight per pack", freeze: "50-80g", retort: "250-300g" },
   {
     label: "Travel & trekking",
     freeze: "Practical - light enough to carry days of meals.",

@@ -7,53 +7,6 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-
 import { useCart } from "@/components/cart-provider";
 import { AnimatedOverlay } from "@/components/motion/animated-overlay";
 import { staggerContainerVariants, staggerItemVariants, tapScale } from "@/components/motion/presets";
-import { FREE_SHIPPING_PROMO_LABEL } from "@/lib/copy/shipping";
-
-const promos = [
-  { icon: "/icons/truck.svg", label: FREE_SHIPPING_PROMO_LABEL, width: 24, height: 24 },
-  { icon: "/icons/package.svg", label: "New launch: Pav Bhaji", width: 24, height: 24 },
-  { icon: "/icons/percent.svg", label: "Use INSTA10 for 10% off", width: 24, height: 24 },
-  { icon: "/icons/leaf.svg", label: "Buy 2 get 1 free", width: 25, height: 27 },
-];
-
-function MarqueeSegment({
-  items,
-  segmentId,
-  ariaHidden,
-}: {
-  items: typeof promos;
-  segmentId: string;
-  ariaHidden?: boolean;
-}) {
-  return (
-    <div
-      className="flex shrink-0 items-center gap-10 py-2.5 pe-10"
-      aria-hidden={ariaHidden}
-    >
-      {items.map((item, index) => (
-        <span
-          key={`${segmentId}-${item.label}-${index}`}
-          className="flex items-center gap-2.5 whitespace-nowrap text-[16px] leading-[30px]"
-        >
-          <img src={item.icon} alt="" width={item.width} height={item.height} />
-          {item.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-export function AnnouncementBar() {
-  const segmentItems = [...promos, ...promos, ...promos];
-  return (
-    <div className="overflow-hidden bg-[#f1e9dd] text-[#1d2f16]">
-      <div className="marquee-track flex w-max">
-        <MarqueeSegment items={segmentItems} segmentId="a" />
-        <MarqueeSegment items={segmentItems} segmentId="b" ariaHidden />
-      </div>
-    </div>
-  );
-}
 
 function getAboutHref(pathname: string) {
   return pathname.startsWith("/products/") ? "#story" : "/#story";
@@ -92,7 +45,6 @@ export function SiteHeader() {
     <header
       className={`sticky top-0 z-40 overflow-x-clip bg-white transition-shadow duration-300 ${scrolled ? "border-b border-[#ede4d4]/90 shadow-sm" : ""}`}
     >
-      <AnnouncementBar />
       <div className="relative mx-auto flex h-[70px] items-center justify-between px-5 md:h-[100px] md:px-[69px]">
         <button
           type="button"
@@ -292,10 +244,10 @@ export function SiteFooter() {
           <FooterNavSection title="Get in touch" className="min-w-0">
             <li>
               <a
-                href="tel:+919825673899"
+                href="mailto:info@instamealz.in"
                 className="link-footer text-[16px] leading-6 whitespace-normal break-words md:whitespace-nowrap md:text-[18px]"
               >
-                +91 98256 73899
+                info@instamealz.in
               </a>
             </li>
           </FooterNavSection>

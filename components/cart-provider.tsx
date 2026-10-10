@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { getProduct } from "@/lib/products";
+import { getProduct, resolveProductImage } from "@/lib/products";
 import {
   DEFAULT_PACKAGE_SIZE_ID,
   isPackageSizeId,
@@ -64,14 +64,18 @@ function subscribe(listener: () => void) {
 }
 
 function normalizeLine(line: CartLine): CartLine {
-  if (isPackageSizeId(line.variant)) return line;
   const product = getProduct(line.slug);
+  const image = product?.image || resolveProductImage(line.image);
+  if (isPackageSizeId(line.variant)) {
+    return line.image === image ? line : { ...line, image };
+  }
   const variant = DEFAULT_PACKAGE_SIZE_ID;
-  if (!product) return { ...line, variant };
+  if (!product) return { ...line, variant, image };
   const defaultPrice = unitPriceInr(product.price, variant);
   const keepCustomPrice = line.price !== product.price && line.price !== defaultPrice;
   return {
     ...line,
+    image,
     variant,
     price: keepCustomPrice ? line.price : defaultPrice,
   };
@@ -113,15 +117,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
       openDrawer: () => setDrawerOpen(true),
       closeDrawer: () => setDrawerOpen(false),
       addLine: (line) => {
+        const product = getProduct(line.slug);
+        const normalizedLine = {
+          ...line,
+          image: product?.image || resolveProductImage(line.image),
+        };
         const current = getSnapshot().lines;
         const match = current.find(
-          (item) => item.slug === line.slug && item.variant === line.variant && item.price === line.price,
+          (item) =>
+            item.slug === normalizedLine.slug &&
+            item.variant === normalizedLine.variant &&
+            item.price === normalizedLine.price,
         );
         const lines = match
-          ? current.map((item) => (item.id === match.id ? { ...item, qty: item.qty + (line.qty ?? 1) } : item))
+          ? current.map((item) =>
+              item.id === match.id ? { ...item, qty: item.qty + (normalizedLine.qty ?? 1) } : item,
+            )
           : [
               ...current,
-              { ...line, qty: line.qty ?? 1, id: `${line.slug}-${line.variant}-${Date.now()}` },
+              {
+                ...normalizedLine,
+                qty: normalizedLine.qty ?? 1,
+                id: `${normalizedLine.slug}-${normalizedLine.variant}-${Date.now()}`,
+              },
             ];
         emit({ ...getSnapshot(), lines });
       },
