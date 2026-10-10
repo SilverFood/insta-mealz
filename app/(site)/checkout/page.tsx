@@ -1,6 +1,17 @@
 import Link from "next/link";
+import { CheckoutPage } from "@/components/cart-checkout";
+import { getStoreSettings } from "@/lib/db/store-settings";
+import { isSandbox } from "@/lib/env";
 
-export default function Page() {
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const { acceptingOrders } = await getStoreSettings();
+
+  if (acceptingOrders) {
+    return <CheckoutPage testMode={isSandbox()} />;
+  }
+
   return (
     <main className="min-w-0 overflow-x-clip bg-[#f7f4ef] px-5 py-16 md:px-10 md:py-24">
       <section className="mx-auto max-w-[700px] rounded-2xl border border-[#e3ddd3] bg-white px-6 py-12 text-center shadow-[0_10px_30px_rgba(29,47,22,0.06)] sm:px-10">

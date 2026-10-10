@@ -479,13 +479,13 @@ export function HomePage() {
           <h2 className="text-center font-sans text-[28px] font-semibold text-[#1d2f16] md:text-[32px]">What makes us different</h2>
         </RevealOnScroll>
         <motion.div
-          className="mx-auto mt-10 grid max-w-[1360px] grid-cols-1 items-center gap-6 md:grid-cols-2 lg:grid-cols-[1fr_minmax(280px,591px)_1fr] lg:grid-rows-2"
+          className="mx-auto mt-10 grid max-w-[1360px] grid-cols-1 gap-6 md:grid-cols-2"
           variants={staggerContainerVariants}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-8% 0px" }}
         >
-          <div className="flex flex-col gap-6 md:order-1 lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:justify-center">
+          <div className="flex flex-col gap-6">
             <motion.div variants={staggerItemVariants}>
               <DiffCard title="No added preservatives" body="Not because we left them out, but because there is nothing for them to do. Preservatives stop water from spoiling food. There is no water in ours." />
             </motion.div>
@@ -493,13 +493,7 @@ export function HomePage() {
               <DiffCard title="100% Vegetarian" body="Every meal, every batch, no exceptions." />
             </motion.div>
           </div>
-          <motion.img
-            variants={staggerItemVariants}
-            src="/images/powders.png"
-            alt="InstaMealz spice powders"
-            className="mx-auto w-full max-w-[591px] object-contain md:order-3 md:col-span-2 lg:order-none lg:col-span-1 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center"
-          />
-          <div className="flex flex-col gap-6 md:order-2 lg:order-none lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:justify-center">
+          <div className="flex flex-col gap-6">
             <motion.div variants={staggerItemVariants}>
               <DiffCard title="No added colours" body="What you see is what the food looked like when it came out of the pan." />
             </motion.div>
