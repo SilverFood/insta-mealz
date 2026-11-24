@@ -52,3 +52,26 @@ export function getSiteUrl(): string {
   if (process.env.NODE_ENV === "development") return "http://localhost:3000";
   throw new Error(`Missing INSTAMEALZ_SITE_URL (INSTAMEALZ_ENV=${getAppEnv()})`);
 }
+
+/** Shiprocket API user credentials plus default parcel settings. */
+export function getShiprocketConfig() {
+  const num = (name: string, fallback: number) => {
+    const parsed = Number(process.env[name]);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  };
+  return {
+    email: requireEnv("SHIPROCKET_EMAIL"),
+    password: requireEnv("SHIPROCKET_PASSWORD"),
+    pickupLocation: process.env.SHIPROCKET_PICKUP_LOCATION?.trim() || "warehouse-1",
+    itemWeightKg: num("SHIPROCKET_ITEM_WEIGHT_KG", 0.25),
+    // Single pouch: 210mm tall x 140mm wide, ~40mm thick (bottom gusset).
+    // Multiple pouches are stacked along the thinnest side, so only height grows.
+    lengthCm: num("SHIPROCKET_PACKAGE_LENGTH_CM", 21),
+    breadthCm: num("SHIPROCKET_PACKAGE_BREADTH_CM", 14),
+    unitHeightCm: num("SHIPROCKET_PACKAGE_HEIGHT_CM", 4),
+  };
+}
+
+export function isShiprocketConfigured(): boolean {
+  return Boolean(process.env.SHIPROCKET_EMAIL?.trim() && process.env.SHIPROCKET_PASSWORD?.trim());
+}

@@ -147,13 +147,86 @@ export async function getOrderById(orderId: string): Promise<OrderRecord | null>
   };
 }
 
-export async function markOrderCompleted(orderId: string, razorpayPaymentId: string) {
+/**
+ * Atomically moves a pending order to completed. Returns true only for the
+ * request that performed the transition, so side effects (shipping, email)
+ * run exactly once even if verify is called concurrently.
+ */
+export async function markOrderCompleted(orderId: string, razorpayPaymentId: string): Promise<boolean> {
   const db = getDb();
   const now = new Date().toISOString();
-  await db.execute({
-    sql: `UPDATE orders SET status = 'completed', razorpay_payment_id = ?, updated_at = ? WHERE id = ?`,
+  const result = await db.execute({
+    sql: `UPDATE orders SET status = 'completed', razorpay_payment_id = ?, updated_at = ?
+          WHERE id = ? AND status = 'pending'`,
     args: [razorpayPaymentId, now, orderId],
   });
+  return result.rowsAffected > 0;
+}
+
+/** How long a "syncing" claim blocks other attempts (covers a crashed request). */
+const SHIPROCKET_CLAIM_TIMEOUT_MS = 5 * 60 * 1000;
+
+/** Claims the right to create the Shiprocket order. False if already created or in progress. */
+export async function claimShiprocketSync(orderId: string): Promise<boolean> {
+  const db = getDb();
+  const now = new Date();
+  const result = await db.execute({
+    sql: `UPDATE orders SET shiprocket_status = 'syncing', shiprocket_error = NULL, shiprocket_updated_at = ?
+          WHERE id = ? AND status = 'completed' AND shiprocket_order_id IS NULL
+            AND (shiprocket_status IS NULL OR shiprocket_status = 'failed'
+                 OR (shiprocket_status = 'syncing' AND shiprocket_updated_at < ?))`,
+    args: [now.toISOString(), orderId, new Date(now.getTime() - SHIPROCKET_CLAIM_TIMEOUT_MS).toISOString()],
+  });
+  return result.rowsAffected > 0;
+}
+
+export async function recordShiprocketSuccess(orderId: string, shiprocketOrderId?: number, shipmentId?: number) {
+  const db = getDb();
+  await db.execute({
+    sql: `UPDATE orders SET shiprocket_order_id = ?, shiprocket_shipment_id = ?, shiprocket_status = 'created',
+                 shiprocket_error = NULL, shiprocket_updated_at = ?
+          WHERE id = ?`,
+    args: [
+      shiprocketOrderId != null ? String(shiprocketOrderId) : null,
+      shipmentId != null ? String(shipmentId) : null,
+      new Date().toISOString(),
+      orderId,
+    ],
+  });
+}
+
+export async function recordShiprocketFailure(orderId: string, error: string) {
+  const db = getDb();
+  await db.execute({
+    sql: `UPDATE orders SET shiprocket_status = 'failed', shiprocket_error = ?, shiprocket_updated_at = ? WHERE id = ?`,
+    args: [error.slice(0, 500), new Date().toISOString(), orderId],
+  });
+}
+
+export async function getRazorpayPaymentId(orderId: string): Promise<string | null> {
+  const db = getDb();
+  const result = await db.execute({
+    sql: `SELECT razorpay_payment_id FROM orders WHERE id = ? AND status = 'completed'`,
+    args: [orderId],
+  });
+  const value = result.rows[0]?.razorpay_payment_id;
+  return value != null ? String(value) : null;
+}
+
+/** Applies a Shiprocket tracking update; returns false if no order matched. */
+export async function updateShiprocketTracking(
+  orderId: string,
+  update: { status?: string; awb?: string; courier?: string },
+): Promise<boolean> {
+  const db = getDb();
+  const result = await db.execute({
+    sql: `UPDATE orders SET shiprocket_status = COALESCE(?, shiprocket_status),
+                 awb_code = COALESCE(?, awb_code), courier_name = COALESCE(?, courier_name),
+                 shiprocket_updated_at = ?
+          WHERE id = ? AND shiprocket_order_id IS NOT NULL`,
+    args: [update.status ?? null, update.awb ?? null, update.courier ?? null, new Date().toISOString(), orderId],
+  });
+  return result.rowsAffected > 0;
 }
 
 export async function markOrderFailed(orderId: string) {

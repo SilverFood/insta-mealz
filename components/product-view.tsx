@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/components/cart-provider";
@@ -29,14 +29,16 @@ const heroItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: easeOut } },
 };
 
-const galleryImages = (product: Product) =>
-  product.slide && product.slide !== product.image ? [product.image, product.slide] : [product.image];
+const isPouch = (src: string) => /_(front|back)\.png$/.test(src);
+
+const galleryImages = (product: Product) => (product.gallery.length ? product.gallery : [product.image]);
 
 export function ProductView({ product }: { product: Product }) {
   const cart = useCart();
   const router = useRouter();
-  const images = galleryImages(product);
-  const [primaryImage, setPrimaryImage] = useState(product.image);
+  const images = useMemo(() => galleryImages(product), [product]);
+  const firstImage = images[0];
+  const [primaryImage, setPrimaryImage] = useState(firstImage);
   const [size, setSize] = useState(sizes[0]);
   const [qty, setQty] = useState(1);
   const [open, setOpen] = useState<string | null>("origin");
@@ -45,13 +47,32 @@ export function ProductView({ product }: { product: Product }) {
   const price = unitPriceInr(product.price, size.id);
   const related = products.filter((item) => item.slug !== product.slug).slice(0, 4);
   useEffect(() => {
-    setPrimaryImage(product.image);
+    setPrimaryImage(firstImage);
     setSize(sizes[0]);
     setQty(1);
     setOpen("origin");
     setFaq(faqs[0].q);
     setMore(false);
-  }, [product.image, product.slug]);
+  }, [firstImage, product.slug]);
+
+  const stepImage = useCallback(
+    (dir: 1 | -1) =>
+      setPrimaryImage((current) => {
+        const index = Math.max(0, images.indexOf(current));
+        return images[(index + dir + images.length) % images.length];
+      }),
+    [images],
+  );
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      const target = event.target as HTMLElement | null;
+      if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      stepImage(event.key === "ArrowRight" ? 1 : -1);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [stepImage]);
 
   const cartLine = cart.findLine(product.slug, size.id, price);
 
@@ -76,16 +97,36 @@ export function ProductView({ product }: { product: Product }) {
       >
         <motion.div variants={heroItem}>
           <div
-            className="relative aspect-square overflow-hidden rounded-[28px] bg-gradient-to-b from-[#faf6ef] to-[#ede4d4] shadow-[0_8px_32px_rgba(29,47,22,0.08)] ring-1 ring-[#1d2f16]/10"
+            className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-gradient-to-b from-[#faf6ef] to-[#ede4d4] shadow-[0_8px_32px_rgba(29,47,22,0.08)] ring-1 ring-[#1d2f16]/10"
           >
             <img
               key={primaryImage}
               src={primaryImage}
               alt={product.name}
-              className="h-full w-full object-contain p-8 transition-opacity duration-300 md:p-10"
+              className={`h-full w-full transition-opacity duration-300 ${isPouch(primaryImage) ? "object-contain p-4" : "object-cover"}`}
             />
+            {images.length > 1 ? (
+              <button
+                type="button"
+                aria-label="Previous image"
+                onClick={() => stepImage(-1)}
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[#1d2f16] shadow-md ring-1 ring-[#1d2f16]/10 transition hover:bg-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+              </button>
+            ) : null}
+            {images.length > 1 ? (
+              <button
+                type="button"
+                aria-label="Next image"
+                onClick={() => stepImage(1)}
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[#1d2f16] shadow-md ring-1 ring-[#1d2f16]/10 transition hover:bg-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+              </button>
+            ) : null}
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-2">
             {images.map((src, index) => {
               const selected = primaryImage === src;
               return (
@@ -95,13 +136,13 @@ export function ProductView({ product }: { product: Product }) {
                   aria-label={`Show image ${index + 1}`}
                   aria-pressed={selected}
                   onClick={() => setPrimaryImage(src)}
-                  className={`relative aspect-square overflow-hidden rounded-2xl bg-[#f6efe4] transition-all duration-200 ${
+                  className={`relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#f6efe4] transition-all duration-200 ${
                     selected
                       ? "scale-[1.02] shadow-[0_4px_16px_rgba(29,47,22,0.12)] ring-2 ring-[#1d2f16] ring-offset-2 ring-offset-white"
                       : "opacity-65 ring-1 ring-[#1d2f16]/12 hover:opacity-100 hover:ring-[#1d2f16]/35"
                   }`}
                 >
-                  <img src={src} alt="" className="pointer-events-none h-full w-full object-contain p-2.5" />
+                  <img src={src} alt="" className={`pointer-events-none h-full w-full ${isPouch(src) ? "object-contain p-1.5" : "object-cover"}`} />
                 </button>
               );
             })}

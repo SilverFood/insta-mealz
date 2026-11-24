@@ -7,13 +7,15 @@ export type Product = {
   category: Category;
   image: string;
   slide?: string;
+  gallery: string[];
   inStock: boolean;
   createdAt: string;
   rank: number;
   blurb: string;
 };
 
-const PRODUCT_IMAGE_ORIGIN = (process.env.NEXT_PUBLIC_PRODUCT_IMAGE_ORIGIN ?? "https://instamealz.in").replace(/\/+$/, "");
+const PRODUCT_IMAGE_ORIGIN = (process.env.NEXT_PUBLIC_PRODUCT_IMAGE_ORIGIN ??
+  (process.env.NODE_ENV === "production" ? "https://instamealz.in" : "")).replace(/\/+$/, "");
 
 export function resolveProductImage(path: string): string {
   const trimmed = path.trim();
@@ -31,6 +33,7 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/paneer_butter_masala_front.png",
     slide: "/images/products/paneer_butter_masala_back.png",
+    gallery: ["/images/products/paneer_butter_masala_front.png", "/images/products/paneer_butter_masala_back.png", "/images/products/paneer_butter_masala_photo.jpg", "/images/products/paneer_butter_masala_cooking.webp", "/images/products/paneer_butter_masala_nutrition.webp"],
     inStock: true,
     createdAt: "2026-01-12",
     rank: 1,
@@ -44,6 +47,7 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/palak_paneer_front.png",
     slide: "/images/products/palak_paneer_back.png",
+    gallery: ["/images/products/palak_paneer_front.png", "/images/products/palak_paneer_back.png", "/images/products/palak_paneer_photo.jpg", "/images/products/palak_paneer_cooking.webp", "/images/products/palak_paneer_nutrition.webp"],
     inStock: true,
     createdAt: "2026-02-02",
     rank: 2,
@@ -57,6 +61,7 @@ const productCatalog: Product[] = [
     category: "Snacks",
     image: "/images/products/pav_bhaji_front.png",
     slide: "/images/products/pav_bhaji_back.png",
+    gallery: ["/images/products/pav_bhaji_front.png", "/images/products/pav_bhaji_back.png", "/images/products/pav_bhaji_photo.jpg", "/images/products/pav_bhaji_cooking.webp", "/images/products/pav_bhaji_nutrition.webp"],
     inStock: true,
     createdAt: "2026-08-01",
     rank: 3,
@@ -70,6 +75,7 @@ const productCatalog: Product[] = [
     category: "Rice",
     image: "/images/products/jeera_rice_front.png",
     slide: "/images/products/jeera_rice_back.png",
+    gallery: ["/images/products/jeera_rice_front.png", "/images/products/jeera_rice_back.png", "/images/products/jeera_rice_photo.jpg", "/images/products/jeera_rice_cooking.webp", "/images/products/jeera_rice_nutrition.webp"],
     inStock: true,
     createdAt: "2026-03-18",
     rank: 4,
@@ -82,6 +88,7 @@ const productCatalog: Product[] = [
     category: "Rice",
     image: "/images/products/veg_dum_biryani_front.png",
     slide: "/images/products/veg_dum_biryani_back.png",
+    gallery: ["/images/products/veg_dum_biryani_front.png", "/images/products/veg_dum_biryani_back.png", "/images/products/veg_dum_biryani_photo.jpg", "/images/products/veg_dum_biryani_cooking.webp", "/images/products/veg_dum_biryani_nutrition.webp"],
     inStock: true,
     createdAt: "2026-04-04",
     rank: 5,
@@ -94,6 +101,7 @@ const productCatalog: Product[] = [
     category: "Rice",
     image: "/images/products/dal_khichdi_front.png",
     slide: "/images/products/dal_khichdi_back.png",
+    gallery: ["/images/products/dal_khichdi_front.png", "/images/products/dal_khichdi_back.png", "/images/products/dal_khichdi_photo.jpg", "/images/products/dal_khichdi_cooking.webp", "/images/products/dal_khichdi_nutrition.webp"],
     inStock: true,
     createdAt: "2026-01-28",
     rank: 6,
@@ -106,6 +114,7 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/rajma_masala_front.png",
     slide: "/images/products/rajma_masala_back.png",
+    gallery: ["/images/products/rajma_masala_front.png", "/images/products/rajma_masala_back.png", "/images/products/rajma_masala_photo.jpg", "/images/products/rajma_masala_cooking.webp", "/images/products/rajma_masala_nutrition.webp"],
     inStock: true,
     createdAt: "2026-05-11",
     rank: 7,
@@ -118,6 +127,7 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/chole_masala_front.png",
     slide: "/images/products/chole_masala_back.png",
+    gallery: ["/images/products/chole_masala_front.png", "/images/products/chole_masala_back.png", "/images/products/chole_masala_photo.jpg", "/images/products/chole_masala_cooking.webp", "/images/products/chole_masala_nutrition.webp"],
     inStock: true,
     createdAt: "2026-05-20",
     rank: 8,
@@ -130,6 +140,7 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/dal_tadka_front.png",
     slide: "/images/products/dal_tadka_back.png",
+    gallery: ["/images/products/dal_tadka_front.png", "/images/products/dal_tadka_back.png", "/images/products/dal_tadka_photo.jpg", "/images/products/dal_tadka_cooking.webp", "/images/products/dal_tadka_nutrition.webp"],
     inStock: true,
     createdAt: "2026-06-02",
     rank: 9,
@@ -142,6 +153,7 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/shahi_paneer_front.png",
     slide: "/images/products/shahi_paneer_back.png",
+    gallery: ["/images/products/shahi_paneer_front.png", "/images/products/shahi_paneer_back.png", "/images/products/shahi_paneer_photo.jpg", "/images/products/shahi_paneer_cooking.webp", "/images/products/shahi_paneer_nutrition.webp"],
     inStock: true,
     createdAt: "2026-06-12",
     rank: 10,
@@ -154,10 +166,24 @@ const productCatalog: Product[] = [
     category: "Gravy",
     image: "/images/products/veg_kolhapuri_front.png",
     slide: "/images/products/veg_kolhapuri_back.png",
+    gallery: ["/images/products/veg_kolhapuri_front.png", "/images/products/veg_kolhapuri_back.png", "/images/products/veg_kolhapuri_photo.jpg", "/images/products/veg_kolhapuri_cooking.webp", "/images/products/veg_kolhapuri_nutrition.webp"],
     inStock: true,
     createdAt: "2026-06-20",
     rank: 11,
     blurb: "A bold and spicy mixed-vegetable Kolhapuri gravy, cooked fresh and freeze-dried for five-minute prep anywhere.",
+  },
+  {
+    slug: "dal-makhani",
+    name: "Dal Makhani",
+    price: 200,
+    category: "Gravy",
+    image: "/images/products/dal_makhani_front.png",
+    slide: "/images/products/dal_makhani_back.png",
+    gallery: ["/images/products/dal_makhani_front.png", "/images/products/dal_makhani_back.png", "/images/products/dal_makhani_photo.jpg", "/images/products/dal_makhani_cooking.webp", "/images/products/dal_makhani_nutrition.webp"],
+    inStock: true,
+    createdAt: "2026-11-20",
+    rank: 12,
+    blurb: "Slow-cooked black lentils and rajma in a creamy, buttery gravy, freeze-dried and ready with hot water in five minutes.",
   },
 ];
 
@@ -165,6 +191,7 @@ export const products: Product[] = productCatalog.map((product) => ({
   ...product,
   image: resolveProductImage(product.image),
   slide: product.slide ? resolveProductImage(product.slide) : undefined,
+  gallery: product.gallery.map(resolveProductImage),
 }));
 
 export const categories = ["All", "Rice", "Gravy", "Snacks"] as const;

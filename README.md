@@ -68,6 +68,8 @@ Payment completion is **client-driven**: after Razorpay succeeds, the browser ca
    - `INSTAMEALZ_SITE_URL` (public origin, no trailing slash)
    - `RESEND_API_KEY`, `EMAIL_FROM` (optional but recommended)
    - `ADMIN_ACCESS_KEY`
+   - Shiprocket (optional): `SHIPROCKET_EMAIL`, `SHIPROCKET_PASSWORD` (a dedicated API user), `SHIPROCKET_PICKUP_LOCATION`, `SHIPROCKET_WEBHOOK_TOKEN` (shared secret sent by Shiprocket in the `x-api-key` header to `/api/shiprocket/webhook`)
+   - Existing databases: apply [`sql/002_shiprocket.sql`](sql/002_shiprocket.sql) once to add the Shiprocket columns.
 3. Run `npm run build:prod` locally or let CI run `npm run build` (defaults to prod).
 4. Smoke-test checkout in Razorpay test mode on staging before switching live keys on production.
 

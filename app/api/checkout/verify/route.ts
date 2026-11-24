@@ -4,6 +4,7 @@ import { getOrderById, markOrderCompleted, markOrderFailed } from "@/lib/db/orde
 import { sendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 import { getRazorpayConfig } from "@/lib/env";
 import { verifyRazorpaySignature } from "@/lib/razorpay/verify";
+import { syncOrderToShiprocket } from "@/lib/shiprocket/sync-order";
 
 export const runtime = "nodejs";
 
@@ -43,7 +44,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
     }
 
-    await markOrderCompleted(orderId, razorpay_payment_id);
+    const transitioned = await markOrderCompleted(orderId, razorpay_payment_id);
+    if (!transitioned) {
+      // A concurrent request already completed this order and ran the side effects.
+      return NextResponse.json({ ok: true, orderId });
+    }
+
+    const shipping = await syncOrderToShiprocket(orderId, razorpay_payment_id);
+    if (shipping.status === "failed") {
+      console.error("[shiprocket]", shipping.error, { orderId });
+    }
 
     const emailResult = await sendOrderConfirmationEmail(orderId);
     if (emailResult.status === "failed") {
@@ -52,7 +62,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, orderId });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Payment verification failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[checkout-verify]", error);
+    return NextResponse.json({ error: "Payment verification failed" }, { status: 500 });
   }
 }
