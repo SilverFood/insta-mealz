@@ -53,7 +53,7 @@ export function getSiteUrl(): string {
   throw new Error(`Missing INSTAMEALZ_SITE_URL (INSTAMEALZ_ENV=${getAppEnv()})`);
 }
 
-/** Shiprocket API user credentials plus default parcel settings. */
+/** Shiprocket API user credentials plus default parcel setting. */
 export function getShiprocketConfig() {
   const num = (name: string, fallback: number) => {
     const parsed = Number(process.env[name]);
